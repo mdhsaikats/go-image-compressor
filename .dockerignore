@@ -1,0 +1,20 @@
+# Ignore build artifacts
+main
+main.exe
+
+# Ignore compressed files
+compressed_*
+
+# Ignore git
+.git
+.gitignore
+
+# Ignore documentation
+README.md
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
