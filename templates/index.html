@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Image Compressor</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <img src="/static/logo.png" alt="Go Image Compressor Logo" class="mx-auto mb-4 w-24 h-24 bg-white">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Image Compressor</h1>
+            <p class="text-gray-600 text-lg">Reduce your image file size while maintaining quality</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-2xl mx-auto">
+            <!-- Upload Area -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                <form id="uploadForm" enctype="multipart/form-data" action="/upload" method="POST">
+                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center transition-all duration-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
+                        <div id="uploadContent">
+                            <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Drop your image here</h3>
+                            <p class="text-gray-500 mb-4">or click to browse</p>
+                            <div class="flex justify-center items-center space-x-2 text-sm text-gray-400">
+                                <span>Supports:</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">JPG</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">PNG</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">JPEG</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview Area -->
+                        <div id="imagePreview" class="hidden">
+                            <img id="previewImg" class="max-w-full max-h-64 mx-auto rounded-lg shadow-md mb-4" alt="Preview">
+                            <div id="fileInfo" class="text-sm text-gray-600 mb-4"></div>
+                            <button type="button" id="removeBtn" class="text-red-500 hover:text-red-700 transition-colors">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <input type="file" name="image" id="fileInput" accept="image/*" class="hidden">
+                    
+                    <!-- Compression Options -->
+                    <div id="compressionOptions" class="hidden mt-6 p-6 bg-gray-50 rounded-xl">
+                        <h4 class="font-semibold text-gray-700 mb-4">Compression Settings</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-2">Resize Factor</label>
+                                <select id="resizeFactor" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="1">Keep Original Size</option>
+                                    <option value="0.75">75% of Original</option>
+                                    <option value="0.5" selected>50% of Original</option>
+                                    <option value="0.25">25% of Original</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-2">Quality (JPEG only)</label>
+                                <select id="quality" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="90">High Quality (90%)</option>
+                                    <option value="75">Good Quality (75%)</option>
+                                    <option value="50" selected>Medium Quality (50%)</option>
+                                    <option value="25">Low Quality (25%)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" id="compressBtn" class="hidden w-full mt-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 px-8 rounded-xl font-semibold text-lg transition-all duration-300 hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-compress-alt mr-2"></i>
+                        Compress Image
+                    </button>
+                </form>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="hidden bg-white rounded-2xl shadow-xl p-8 text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                <h3 class="text-xl font-semibold text-gray-700">Compressing your image...</h3>
+                <p class="text-gray-500 mt-2">This may take a few seconds</p>
+            </div>
+
+            <!-- Features -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                <div class="text-center p-6">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
+                        <i class="fas fa-bolt text-blue-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Fast Processing</h3>
+                    <p class="text-gray-500 text-sm">Lightning-fast compression powered by Go</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
+                        <i class="fas fa-shield-alt text-green-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Secure & Private</h3>
+                    <p class="text-gray-500 text-sm">Your images are processed locally</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4">
+                        <i class="fas fa-download text-purple-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Instant Download</h3>
+                    <p class="text-gray-500 text-sm">Get your compressed image immediately</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="bg-white mt-12 py-6">
+        <div class="container mx-auto text-center">
+            <h1>Made with <i class="fas fa-heart text-red-500"></i> by Saikat</h1>
+        </div>
+    </footer>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadContent = document.getElementById('uploadContent');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const fileInfo = document.getElementById('fileInfo');
+        const removeBtn = document.getElementById('removeBtn');
+        const compressionOptions = document.getElementById('compressionOptions');
+        const compressBtn = document.getElementById('compressBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        const loadingState = document.getElementById('loadingState');
+
+        // Click to browse
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-400', 'bg-blue-50');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Handle file selection
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                fileInfo.innerHTML = `
+                    <strong>${file.name}</strong><br>
+                    Size: ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                    Type: ${file.type}
+                `;
+                
+                uploadContent.classList.add('hidden');
+                imagePreview.classList.remove('hidden');
+                compressionOptions.classList.remove('hidden');
+                compressBtn.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove file
+        removeBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            uploadContent.classList.remove('hidden');
+            imagePreview.classList.add('hidden');
+            compressionOptions.classList.add('hidden');
+            compressBtn.classList.add('hidden');
+        });
+
+        // Form submission
+        uploadForm.addEventListener('submit', (e) => {
+            document.querySelector('.max-w-2xl').classList.add('hidden');
+            loadingState.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
