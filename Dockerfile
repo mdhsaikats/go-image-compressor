@@ -19,8 +19,8 @@ RUN go build -o main .
 # Use lightweight alpine image for final stage
 FROM alpine:latest
 
-# Install ca-certificates for HTTPS requests
-RUN apk --no-cache add ca-certificates
+# Install ca-certificates and FFmpeg for video/GIF processing
+RUN apk --no-cache add ca-certificates ffmpeg
 
 # Set working directory
 WORKDIR /root/

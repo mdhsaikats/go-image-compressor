@@ -25,27 +25,32 @@
                     <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center transition-all duration-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
                         <div id="uploadContent">
                             <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
-                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Drop your image here</h3>
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Drop your image, GIF, or video here</h3>
                             <p class="text-gray-500 mb-4">or click to browse</p>
-                            <div class="flex justify-center items-center space-x-2 text-sm text-gray-400">
+                            <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400">
                                 <span>Supports:</span>
                                 <span class="bg-gray-100 px-2 py-1 rounded">JPG</span>
                                 <span class="bg-gray-100 px-2 py-1 rounded">PNG</span>
                                 <span class="bg-gray-100 px-2 py-1 rounded">JPEG</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">GIF</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">MP4</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">MOV</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">AVI</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">WEBM</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded">MKV</span>
                             </div>
                         </div>
-                        
                         <!-- Preview Area -->
                         <div id="imagePreview" class="hidden">
-                            <img id="previewImg" class="max-w-full max-h-64 mx-auto rounded-lg shadow-md mb-4" alt="Preview">
+                            <img id="previewImg" class="max-w-full max-h-64 mx-auto rounded-lg shadow-md mb-4" alt="Preview" style="display:none;">
+                            <video id="previewVideo" class="max-w-full max-h-64 mx-auto rounded-lg shadow-md mb-4" controls style="display:none;"></video>
                             <div id="fileInfo" class="text-sm text-gray-600 mb-4"></div>
                             <button type="button" id="removeBtn" class="text-red-500 hover:text-red-700 transition-colors">
                                 <i class="fas fa-times"></i> Remove
                             </button>
                         </div>
                     </div>
-                    
-                    <input type="file" name="image" id="fileInput" accept="image/*" class="hidden">
+                    <input type="file" name="image" id="fileInput" accept="image/*,video/*,.gif" class="hidden">
                     
                     <!-- Compression Options -->
                     <div id="compressionOptions" class="hidden mt-6 p-6 bg-gray-50 rounded-xl">
@@ -162,28 +167,45 @@
             }
         });
 
-        // Handle file selection
+        // Handle file selection (image, gif, video)
         function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file.');
+            const isImage = file.type.startsWith('image/') && !file.type.endsWith('gif');
+            const isGif = file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
+            const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|avi|webm|mkv)$/i.test(file.name);
+
+            // Hide all previews first
+            previewImg.style.display = 'none';
+            previewVideo.style.display = 'none';
+
+            if (!(isImage || isGif || isVideo)) {
+                alert('Please select an image, GIF, or video file.');
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                previewImg.src = e.target.result;
+                if (isImage || isGif) {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                } else if (isVideo) {
+                    previewVideo.src = e.target.result;
+                    previewVideo.style.display = 'block';
+                }
                 fileInfo.innerHTML = `
                     <strong>${file.name}</strong><br>
                     Size: ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
                     Type: ${file.type}
                 `;
-                
                 uploadContent.classList.add('hidden');
                 imagePreview.classList.remove('hidden');
                 compressionOptions.classList.remove('hidden');
                 compressBtn.classList.remove('hidden');
             };
-            reader.readAsDataURL(file);
+            if (isVideo) {
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsDataURL(file);
+            }
         }
 
         // Remove file
